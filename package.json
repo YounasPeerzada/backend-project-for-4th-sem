@@ -1,0 +1,17 @@
+{
+  "name": "backend-project-for-web",
+  "version": "1.0.0",
+  "description": "Backend project of web for 4th semester",
+  "keywords": [
+    "java-script",
+    "express",
+    "api"
+  ],
+  "license": "ISC",
+  "author": "Muhammad Younus Peerzada",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
