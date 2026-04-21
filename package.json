@@ -2,6 +2,7 @@
   "name": "backend-project-for-web",
   "version": "1.0.0",
   "description": "Backend project of web for 4th semester",
+  "type": "module",
   "keywords": [
     "java-script",
     "express",
@@ -9,9 +10,11 @@
   ],
   "license": "ISC",
   "author": "Muhammad Younus Peerzada",
-  "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
