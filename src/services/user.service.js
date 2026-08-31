@@ -6,19 +6,26 @@ import {
   findUserByIdSanitized,
   findUserByUsernameOrEmail,
   createUser,
-  saveUser,
+  updateUserRefreshToken,
   clearUserRefreshToken,
 } from "../repositories/user.repository.js";
+import {
+  hashPassword,
+  isPasswordCorrect,
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/auth.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await findUserById(userId);
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user._id);
 
-    user.refreshToken = refreshToken;
-
-    await saveUser(user);
+    await updateUserRefreshToken(user._id, refreshToken);
 
     return { accessToken, refreshToken };
   } catch (error) {
@@ -51,11 +58,13 @@ const registerUser = async ({
     throw new ApiError(500, "Failed to upload avatar");
   }
 
+  const hashedPassword = await hashPassword(password);
+
   const user = await createUser({
     username: username.toLowerCase(),
     fullName,
     email: email.toLowerCase(),
-    password,
+    password: hashedPassword,
     avatar: avatar.url,
     coverImage: coverImage?.url || "",
   });
@@ -80,7 +89,7 @@ const loginUser = async ({ username, email, password }) => {
     throw new ApiError(404, "User not found");
   }
 
-  const isPasswordValid = await user.isPasswordCorrect(password);
+  const isPasswordValid = await isPasswordCorrect(password, user.password);
 
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid credentials");
@@ -126,4 +135,13 @@ const refreshAccessToken = async (incomingRefreshToken) => {
   }
 };
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const verifyAccessToken = async (token) => {
+  const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  const user = await findUserByIdSanitized(decodedToken?._id);
+  if (!user) {
+    throw new ApiError(401, "Invalid Access Token");
+  }
+  return user;
+};
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, verifyAccessToken };

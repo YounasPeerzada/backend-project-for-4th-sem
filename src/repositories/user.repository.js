@@ -1,29 +1,37 @@
 import { User } from "../models/user.model.js";
 
-const findUserById = (userId) => {
-  return User.findById(userId);
+const findUserById = async (userId) => {
+  return await User.findById(userId);
 };
 
-const findUserByIdSanitized = (userId) => {
-  return User.findById(userId).select("-password -refreshToken");
+const findUserByIdSanitized = async (userId) => {
+  return await User.findById(userId).select("-password -refreshToken");
 };
 
-const findUserByUsernameOrEmail = ({ username, email }) => {
-  return User.findOne({
+const findUserByUsernameOrEmail = async ({ username, email }) => {
+  return await User.findOne({
     $or: [{ username }, { email }],
   });
 };
 
-const createUser = (userData) => {
-  return User.create(userData);
+const createUser = async (userData) => {
+  return await User.create(userData);
 };
 
-const saveUser = (user) => {
-  return user.save({ validateBeforeSave: false });
+const updateUserRefreshToken = async (userId, refreshToken) => {
+  return await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: { refreshToken },
+    },
+    {
+      new: true,
+    }
+  );
 };
 
-const clearUserRefreshToken = (userId) => {
-  return User.findByIdAndUpdate(
+const clearUserRefreshToken = async (userId) => {
+  return await User.findByIdAndUpdate(
     userId,
     {
       $set: { refreshToken: undefined },
@@ -39,6 +47,6 @@ export {
   findUserByIdSanitized,
   findUserByUsernameOrEmail,
   createUser,
-  saveUser,
+  updateUserRefreshToken,
   clearUserRefreshToken,
 };
